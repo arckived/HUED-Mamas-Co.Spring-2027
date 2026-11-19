@@ -8,6 +8,17 @@ internal score are never stored.
 All data is synthetic. The code uses only the Python 3.10+ standard library
 and makes no network or model calls.
 
+## Rules the evaluator enforces
+
+* Patient-facing text never shows the internal 0 to 100 readiness score.
+* No diagnosis, fertility probability, treatment advice or causal claim.
+* Daily insights do not change the readiness tier, so any claim that they
+  rescore it is blocked.
+* The readiness score comes from a separate deterministic calculator. The
+  evaluator only reads it to detect leaks and never changes it.
+* Provider access needs consent and a verified, purpose-specific grant.
+* Only text from `approved_catalog.json` is shown.
+
 ## Run it
 
 ```bash
@@ -78,4 +89,3 @@ verified means **human review**. Only a patient case that passes every gate is
 | `DECISIONS.md` | Choices, assumptions, tradeoffs |
 | `NEXT_ACTIONS.md` | Handoff to dependent workstreams |
 | `AI-USE.md` | AI tool disclosure and checks |
-| `SHARED_CASE_CONTEXT.md` | Product boundaries the evaluator enforces |
