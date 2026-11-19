@@ -12,8 +12,8 @@ report files.
 * Confirmed the new tests fail on the original starter.
 * Reviewed each case decision against `model_outputs.jsonl`.
 
-**My changes after review:** I reviewed the first version and asked for four
-changes, which were then implemented with the same tool and retested:
+**My changes after review:** I reviewed the first version and changed the following things, 
+which were then implemented:
 1. Revoked, mismatched or malformed provider authorization now blocks; missing
    authorization (M06) still goes to human review.
 2. Score leakage tests for transformed values (percentage, fraction, words),
