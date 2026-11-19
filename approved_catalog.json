@@ -1,0 +1,9 @@
+{
+  "policy_version": "EDU-SYNTH-1",
+  "response_ids": {
+    "READY-TIER": "A readiness tier summarizes approved intake information and is not a diagnosis.",
+    "DAILY-INSIGHT": "Saved daily insights are separate from intake scoring and do not automatically change the readiness tier.",
+    "MISSING-STATE": "An incomplete status means the app does not have enough approved information to display a readiness tier.",
+    "CONSENT": "A person can withdraw a sharing permission. Authorized access must honor the latest permission state."
+  }
+}
