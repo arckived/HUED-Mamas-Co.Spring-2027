@@ -1,7 +1,7 @@
 # BASELINE.md
 
 Recorded before any change to `evaluator.py`. The unmodified starter is commit
-`94a0488` ("Add Track A starter package as received (unmodified)").
+`b28f4c0` ("Add Track A starter package as received (unmodified)").
 
 ## Environment
 
