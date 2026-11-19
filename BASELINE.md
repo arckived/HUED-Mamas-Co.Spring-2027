@@ -1,4 +1,4 @@
-# BASELINE.md
+# Baseline
 
 Recorded before any change to `evaluator.py`. The unmodified starter is commit
 `b28f4c0` ("Add Track A starter package as received (unmodified)").
@@ -38,7 +38,7 @@ Each failure was an `AssertionError: 'allow' != 'block'` (M06: `'allow' == 'allo
 `approved_catalog.json`, and every case uses a valid ID. So the starter never
 looks at the text, consent, actor or score.
 
-Cases the starter allowed that have no test in the package: **M08** (approved
+Cases the starter allowed that the provided tests do not cover: **M08** (approved
 sentence plus a fabricated study) and **M10** (provider with `consent: false`).
 
 ## Assumptions made at baseline

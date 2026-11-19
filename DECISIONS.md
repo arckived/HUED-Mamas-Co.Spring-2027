@@ -1,4 +1,4 @@
-# DECISIONS.md
+# Decisions
 
 Prioritised by safety impact.
 
@@ -7,8 +7,8 @@ Prioritised by safety impact.
 **Choice:** text must equal the approved text for the case's own `response_id`.
 Only whitespace is normalised. Case, spelling and punctuation are not.
 
-**Why:** the Track A instructions say the catalog is the only authorised source and that
-plausible text is not automatically authorised. Exact match is the one check
+**Why:** the catalog is the only authorised source of response text, and text
+that merely sounds plausible is not authorised. Exact match is the one check
 whose result means something without clinical review.
 
 **Tradeoff:** harmless rewording is blocked (see the false positive in
@@ -86,7 +86,7 @@ see the provided tests pass as written.
 
 ## Assumptions
 
-* Patient `consent: false` (M03) means the response must not be displayed, even though a patient is looking at their own information. The package does not say what the patient consent covers, so I took the safer reading.
+* Patient `consent: false` (M03) means the response must not be displayed, even though a patient is looking at their own information. The data does not say what the patient consent covers, so I took the safer reading.
 * `response_id` was selected correctly by an upstream component. The evaluator checks wording, not whether the response suits the user's state.
 * English only.
 

@@ -1,6 +1,6 @@
-# AI-USE.md
+# AI Use
 
-**Tool:** Claude Code (Anthropic), used offline on the synthetic package only.
+**Tool:** Claude Code (Anthropic), used offline on the synthetic data only.
 No real data, credentials or model APIs.
 
 **Used for:** writing `evaluator.py`, the new tests, and first drafts of the

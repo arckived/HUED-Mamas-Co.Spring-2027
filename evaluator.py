@@ -1,6 +1,6 @@
 """Offline content evaluator for synthetic Kira-style responses (Track A).
 
-Synthetic assessment code. Do not use for real clinical or access decisions.
+Built and tested on synthetic data only. Do not use for real clinical or access decisions.
 
 What this module does:
   * Applies deterministic gates to one model response at a time and returns
