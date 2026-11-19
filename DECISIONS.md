@@ -7,7 +7,7 @@ Prioritised by safety impact.
 **Choice:** text must equal the approved text for the case's own `response_id`.
 Only whitespace is normalised. Case, spelling and punctuation are not.
 
-**Why:** the README says the catalog is the only authorised source and that
+**Why:** the Track A instructions say the catalog is the only authorised source and that
 plausible text is not automatically authorised. Exact match is the one check
 whose result means something without clinical review.
 
