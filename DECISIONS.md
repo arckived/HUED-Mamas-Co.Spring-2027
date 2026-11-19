@@ -15,25 +15,47 @@ whose result means something without clinical review.
 `MODEL_EVALUATION.md`). I accepted more false blocks in exchange for no
 unreviewed text reaching a patient.
 
-## 2. Provider cases are never auto-allowed
+## 2. Provider cases are never auto-allowed; explicit non-authorization blocks
 
-**Choice:** a provider case with `consent: true` goes to `human_review`
-(M06). A provider case with `consent: false` is blocked (M10).
+**Choice:** a provider case with `consent: true` and no verifiable grant goes
+to `human_review` (M06). A provider case with `consent: false` is blocked
+(M10). If the case carries authorization metadata that is revoked, for a
+different purpose, or malformed, it is blocked, not reviewed. Active and
+matching metadata still goes to review because it is self-reported.
+
+**Changed after review:** the first version sent every provider problem to
+review. That let a reviewer approve a case whose own data said access was
+revoked or for another purpose. Missing evidence and contrary evidence are now
+treated differently.
 
 **Why:** the record has no purpose, grant ID, scope or timestamp, so the
 evaluator has no way to check "an active purpose-specific provider grant". I did
-not invent a purpose list or grant format, because that would be making a
-permission decision that belongs to the consent and access owner.
+not invent a list of permitted purposes, because that is a permission decision
+for the consent and access owner. The `authorization` and `requested_purpose`
+fields used in the tests are a minimal proposed shape so the block and review
+paths can be tested; they are not an agreed format.
 
 **Why review and not block for M06:** the text is fine and consent is
 asserted, so the remaining gap is one a person can close by checking the
 consent system. Revoked consent (M10) is not something a reviewer should be
 able to override, so it blocks.
 
-## 3. `consent` must be the boolean `true`
+## 3. Inputs are validated strictly and the evaluator fails closed
 
-Strings like `"true"`, `1`, a missing field or `null` all block. Silent type
-coercion on a consent field is how access gets extended by accident.
+`consent` must be the boolean `true`. IDs must be non-blank text, the score must
+be a number or null, and the catalog must have a `policy_version` and text
+values for every response ID. Anything else blocks, including a malformed
+catalog, which blocks every case rather than allowing unchecked text.
+
+For consent, strings like `"true"`, `1`, a missing field or `null` all block.
+Silent type coercion on a consent field is how access gets extended by
+accident.
+
+## 3a. Score leakage covers common rewrites, not every possible one
+
+The score gate checks the raw value, fraction and percentage forms, and
+words. Describing the score in other ways is a known gap, recorded in a test,
+and covered today only by exact grounding.
 
 ## 4. All gates run, and the strictest result wins
 
@@ -72,7 +94,7 @@ see the provided tests pass as written.
 
 | Problem | Next step | Who decides |
 |---|---|---|
-| No way to verify provider purpose grants | Agree a minimal grant record and add contract tests | Consent and access platform owner |
+| No way to verify provider purpose grants | Replace the proposed `authorization` test shape with the agreed grant record | Consent and access platform owner |
 | Exact match blocks safe paraphrases | Ask whether paraphrases are ever allowed; if yes, get a reviewed variant list, not fuzzy matching | Clinical and scientific content owner |
 | Plain SHA-256 is reversible for known short text | Propose keyed HMAC; needs a key owner and retention rule | Privacy and security |
 | Keyword lists not clinically reviewed | Send the lists in `evaluator.py` for review | Clinical and scientific content owner |

@@ -10,7 +10,38 @@ python -m unittest discover -s tests -v
 python evaluator.py
 ```
 
-The first runs all 22 tests (7 provided, 15 new). The second regenerates `evaluation_results.json`.
+The first runs all 36 tests (7 provided, 29 new). The second regenerates `evaluation_results.json`.
+
+## How a case is decided
+
+Every case goes through all five gates, so the audit record lists every
+problem found. The strictest result wins.
+
+```mermaid
+flowchart TD
+    A[Case + approved catalog] --> G1{1. Fields and catalog valid?}
+    G1 -- no --> B[BLOCK]
+    G1 -- yes --> G2{2. Consent is true?}
+    G2 -- no --> B
+    G2 -- yes --> P{Actor is provider?}
+    P -- "grant revoked, wrong purpose or malformed" --> B
+    P -- "grant missing or only self-reported" --> R[HUMAN REVIEW]
+    P -- patient --> G3
+    R -. other gates still run .-> G3
+    G3{3. Text is exactly the approved text for its response_id?}
+    G3 -- no --> B
+    G3 -- yes --> G4{4. Internal score shown in any common form?}
+    G4 -- yes --> B
+    G4 -- no --> G5{5. Diagnosis, treatment, prediction, rescore, evidence or private info in unapproved text?}
+    G5 -- yes --> B
+    G5 -- no --> OK[ALLOW, unless already sent to review]
+```
+
+Plain text version: missing or bad input, no consent, explicit lack of
+provider authorization, any wording change from the catalog, a visible score,
+or a flagged claim means **block**. A provider case whose authorization cannot
+be verified means **human review**. Only a patient case that passes every gate
+is **allowed**.
 
 | Result | Cases |
 |---|---|

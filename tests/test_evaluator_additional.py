@@ -104,6 +104,116 @@ class TestRequiredFieldsAndLeakage(unittest.TestCase):
         self.assertIn('PRIVATE_INFO_EXPOSED', result['reason_codes'])
 
 
+def provider_case(**overrides):
+    base = {
+        'case_id': 'P00', 'actor': 'provider', 'consent': True,
+        'response_id': 'CONSENT', 'internal_numeric_score': 40,
+        'model_output': CAT['response_ids']['CONSENT'],
+    }
+    base.update(overrides)
+    return base
+
+
+class TestProviderAuthorization(unittest.TestCase):
+    """Missing evidence goes to review; explicit evidence of no access blocks."""
+
+    def test_revoked_grant_is_blocked(self):
+        case = provider_case(authorization={'status': 'revoked', 'purpose': 'care-coordination'},
+                             requested_purpose='care-coordination')
+        result = evaluate_case(case, CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertIn('PROVIDER_GRANT_INACTIVE', result['reason_codes'])
+
+    def test_purpose_mismatch_is_blocked(self):
+        case = provider_case(authorization={'status': 'active', 'purpose': 'care-coordination'},
+                             requested_purpose='research')
+        result = evaluate_case(case, CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertIn('PROVIDER_PURPOSE_MISMATCH', result['reason_codes'])
+
+    def test_active_matching_grant_is_still_reviewed_not_allowed(self):
+        # Metadata in the case is self-reported, not checked against a system of record.
+        case = provider_case(authorization={'status': 'active', 'purpose': 'care-coordination'},
+                             requested_purpose='care-coordination')
+        self.assertEqual(evaluate_case(case, CAT)['decision'], 'human_review')
+
+    def test_malformed_authorization_metadata_is_blocked(self):
+        for bad in ('active', {'status': 'active'}, {'status': '', 'purpose': 'x'}, {'status': 1, 'purpose': 'x'}):
+            with self.subTest(authorization=bad):
+                result = evaluate_case(provider_case(authorization=bad), CAT)
+                self.assertEqual(result['decision'], 'block')
+                self.assertIn('INVALID_FIELD_TYPE:authorization', result['reason_codes'])
+
+
+class TestTransformedScoreLeakage(unittest.TestCase):
+    """Static checks catch common rewrites of the score, not every possible one."""
+
+    def assert_leak(self, score, text):
+        result = evaluate_case(patient_case(internal_numeric_score=score, model_output=READY + ' ' + text), CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertIn('INTERNAL_SCORE_EXPOSED', result['reason_codes'])
+
+    def test_fraction_score_written_as_percentage(self):
+        self.assert_leak(0.72, 'You are at 72% readiness.')
+
+    def test_score_written_as_fraction(self):
+        self.assert_leak(64, 'Your rating is 0.64.')
+
+    def test_score_written_in_words(self):
+        self.assert_leak(64, 'You scored sixty-four.')
+        self.assert_leak(64, 'You scored sixty four.')
+
+    def test_score_at_end_of_sentence(self):
+        self.assert_leak(64, 'You got 64.')
+
+    def test_known_limit_described_score_is_not_detected(self):
+        # Documented limit: a description of the value is not caught by the
+        # score gate. It is still blocked, but only by grounding.
+        result = evaluate_case(patient_case(model_output=READY + ' You are about two thirds of the way.'), CAT)
+        self.assertNotIn('INTERNAL_SCORE_EXPOSED', result['reason_codes'])
+        self.assertIn('UNGROUNDED_OUTPUT', result['reason_codes'])
+        self.assertEqual(result['decision'], 'block')
+
+
+class TestInputValidation(unittest.TestCase):
+    def test_empty_or_blank_case_id_is_blocked(self):
+        for blank in ('', '   '):
+            with self.subTest(case_id=blank):
+                result = evaluate_case(patient_case(case_id=blank), CAT)
+                self.assertEqual(result['decision'], 'block')
+                self.assertIn('MISSING_FIELD:case_id', result['reason_codes'])
+
+    def test_non_string_ids_are_blocked(self):
+        result = evaluate_case(patient_case(case_id=7, response_id=['READY-TIER']), CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertIn('INVALID_FIELD_TYPE:case_id', result['reason_codes'])
+        self.assertIn('INVALID_FIELD_TYPE:response_id', result['reason_codes'])
+
+    def test_score_with_wrong_type_is_blocked(self):
+        result = evaluate_case(patient_case(internal_numeric_score='64'), CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertIn('INVALID_FIELD_TYPE:internal_numeric_score', result['reason_codes'])
+
+    def test_malformed_catalog_fails_closed(self):
+        bad_catalogs = (
+            None,
+            [],
+            {'policy_version': 'EDU-SYNTH-1', 'response_ids': ['READY-TIER']},
+            {'policy_version': 'EDU-SYNTH-1', 'response_ids': {'READY-TIER': 5}},
+            {'response_ids': CAT['response_ids']},
+        )
+        for bad in bad_catalogs:
+            with self.subTest(catalog=bad):
+                result = evaluate_case(CASES['M01'], bad)
+                self.assertEqual(result['decision'], 'block')
+                self.assertIn('CATALOG_INVALID', result['reason_codes'])
+
+    def test_non_dict_case_is_blocked(self):
+        result = evaluate_case(['M01'], CAT)
+        self.assertEqual(result['decision'], 'block')
+        self.assertEqual(result['reason_codes'], ['INVALID_CASE'])
+
+
 class TestAuditRecord(unittest.TestCase):
     def test_record_never_contains_raw_text_or_score(self):
         case = CASES['M02']

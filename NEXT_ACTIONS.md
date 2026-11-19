@@ -9,9 +9,9 @@ does not name people.
 |---|---|
 | **Observed state** | Provider cases carry only `consent: true/false`. There is no purpose, grant ID, scope, expiry or revocation time. |
 | **Impact** | Provider-facing responses cannot be safely auto-approved. M06 is held for review; M10 is blocked. If this stays unresolved, every provider response needs a person to check it. |
-| **Evidence** | M06, M10 in `evaluation_results.json`; `PROVIDER_PURPOSE_UNVERIFIED`; `test_provider_purpose_must_be_verified`, `test_provider_with_consent_goes_to_human_review`. |
+| **Evidence** | M06, M10 in `evaluation_results.json`; `PROVIDER_PURPOSE_UNVERIFIED`; `test_provider_purpose_must_be_verified`, `test_provider_with_consent_goes_to_human_review`, `TestProviderAuthorization` (revoked and mismatched grants block; missing or self-reported grants go to review). |
 | **Contact** | Consent and access platform owner, with privacy in copy. Direct message with this table and the two case IDs, then a 20 minute call if the answer is not a short reply. |
-| **Safe work before it is resolved** | Keep providers at `human_review`/`block`. Draft a proposed grant record (`grant_id`, `subject`, `provider_org`, `purpose`, `status`, `granted_at`, `revoked_at`) as a suggestion only, plus synthetic fixtures for active, revoked and wrong-purpose grants. |
+| **Safe work before it is resolved** | Keep providers at `human_review`/`block`. Done so far: a minimal proposed shape (`authorization.status`, `authorization.purpose`, `requested_purpose`) with synthetic tests for active, revoked, wrong-purpose and malformed grants. Still a proposal only; a full record would also need `grant_id`, `provider_org`, `granted_at`, `revoked_at`. |
 | **Needs an authorised decision** | The list of permitted provider purposes, which purpose each `response_id` needs, and whether the evaluator may trust a grant passed in the case or must query the system of record. |
 | **Next verifiable action** | A contract test where an active, matching synthetic grant allows M06 and a revoked one blocks it. The test should fail until the agreed format exists. |
 
