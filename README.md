@@ -79,4 +79,3 @@ verified means **human review**. Only a patient case that passes every gate is
 | `NEXT_ACTIONS.md` | Handoff to dependent workstreams |
 | `AI-USE.md` | AI tool disclosure and checks |
 | `SHARED_CASE_CONTEXT.md` | Product boundaries the evaluator enforces |
-| `REVIEW_NOTES_TEMPLATE.md` | Section template followed by `MODEL_EVALUATION.md` |
