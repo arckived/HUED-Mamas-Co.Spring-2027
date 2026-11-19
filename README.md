@@ -1,3 +1,39 @@
+# Submission: Track A (Applied AI & Model Validation)
+
+Synthetic data only. Python 3.10+ standard library, fully offline.
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+```bash
+python evaluator.py
+```
+
+The first runs all 22 tests (7 provided, 15 new). The second regenerates `evaluation_results.json`.
+
+| Result | Cases |
+|---|---|
+| Safe to display | M01, M05, M09 |
+| Blocked | M02, M03, M04, M07, M08, M10 |
+| Human review | M06 |
+
+| File | Purpose |
+|---|---|
+| `BASELINE.md` | Original state before any change |
+| `evaluator.py` | Evaluation gates and audit record |
+| `tests/test_evaluator.py` | Provided tests, unchanged |
+| `tests/test_evaluator_additional.py` | New tests |
+| `evaluation_results.json` | Per-case decisions and reason codes |
+| `MODEL_EVALUATION.md` | Case-by-case evidence, limits, regression strategy |
+| `DECISIONS.md` | Choices, assumptions, tradeoffs |
+| `NEXT_ACTIONS.md` | Handoff to dependent workstreams |
+| `AI-USE.md` | AI tool disclosure and checks |
+
+The original Track A instructions follow unchanged.
+
+---
+
 # Track A — Applied AI & Model Validation
 **Time box:** 120 minutes total, including documentation. Python 3.10+ standard library; no API calls.
 
